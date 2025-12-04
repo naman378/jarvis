@@ -1,0 +1,884 @@
+<!-- jarvis.html -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>JARVIS — Full System</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Poppins:wght@300;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-1: #0b3b1c;
+    --neon: #2e7d32;         /* main green accent */
+    --accent: #ffb300;       /* warm golden accent */
+    --glass: rgba(255,255,255,0.25);
+    --muted: #5e6f64;
+  }
+
+  html,body{
+    height:100%;
+    margin:0;
+  }
+
+  body{
+    position:relative;
+    min-height:100%;
+    font-family:Poppins,system-ui,Segoe UI,Roboto,Arial;
+    color:#1b3c29;
+    overflow:hidden;
+    background:#e8f5e9;
+  }
+
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:
+      linear-gradient(to bottom, rgba(255,255,255,0.45), rgba(0,0,0,0.25)),
+      url("Background.jpg") center/cover no-repeat;
+    filter:blur(20%);
+    transform:scale(1.05);
+    z-index:-1;
+  }
+
+  .app{
+    position:relative;
+    width:1100px;
+    max-width:96vw;
+    height:760px;
+    max-height:94vh;
+    margin:24px auto;
+    border-radius:18px;
+    padding:22px;
+    box-sizing:border-box;
+    background:linear-gradient(135deg, rgba(255,255,255,0.96), rgba(236,248,237,0.96));
+    border:1px solid rgba(200,230,201,0.9);
+    box-shadow:0 26px 80px rgba(0,0,0,0.45);
+    display:grid;
+    grid-template-columns:360px 1fr;
+    gap:18px;
+  }
+
+  .left{
+    padding:20px;
+    background:linear-gradient(145deg, rgba(232,245,233,0.98), rgba(210,239,214,0.98));
+    border-radius:14px;
+    border:1px solid rgba(200,230,201,0.9);
+    position:relative;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  .brand{
+    font-family:Orbitron,monospace;
+    font-size:22px;
+    letter-spacing:4px;
+    color:var(--neon);
+    text-shadow:0 0 14px rgba(255,255,255,0.8);
+    margin-bottom:4px;
+  }
+
+  .subtitle{
+    color:var(--muted);
+    font-size:12px;
+    margin-bottom:12px;
+  }
+
+  .holo-wrap{
+    width:260px;
+    height:260px;
+    border-radius:50%;
+    position:relative;
+    margin:10px 0;
+    box-shadow:0 10px 35px rgba(46,125,50,0.35);
+  }
+
+  #holo{
+    width:100%;
+    height:100%;
+    display:block;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, rgba(76,175,80,0.18), rgba(255,255,255,0.02) 45%);
+    box-shadow:
+      inset 0 0 40px rgba(76,175,80,0.25),
+      0 0 30px rgba(129,199,132,0.9);
+    border:2px solid rgba(200,230,201,0.95);
+  }
+
+  .holo-reflection{
+    position:absolute;
+    left:12%;
+    top:12%;
+    width:76%;
+    height:76%;
+    border-radius:50%;
+    pointer-events:none;
+    mix-blend-mode:screen;
+    filter:blur(14px);
+    opacity:0.38;
+    background:radial-gradient(circle at 20% 0%, rgba(255,255,255,0.9), transparent 55%);
+  }
+
+  .controls{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-top:14px;
+    width:100%;
+    align-items:center;
+  }
+
+  .big-btn{
+    padding:12px 22px;
+    border-radius:999px;
+    border:0;
+    cursor:pointer;
+    font-weight:700;
+    background:linear-gradient(135deg,#43a047,#2e7d32);
+    color:#ffffff;
+    box-shadow:0 8px 20px rgba(56,142,60,0.35);
+    width:85%;
+    font-size:14px;
+    transition:all 0.15s ease-out;
+  }
+
+  .big-btn:hover{
+    transform:translateY(-1px);
+    box-shadow:0 12px 26px rgba(46,125,50,0.4);
+  }
+
+  .big-btn:active{
+    transform:translateY(0);
+    box-shadow:0 4px 14px rgba(56,142,60,0.3);
+  }
+
+  .mic-btn{
+    background:linear-gradient(135deg,#fdd835,#f9a825);
+    color:#3e2723;
+    width:70%;
+  }
+
+  .tiny{
+    background:#f1f8e9;
+    border:1px solid #c5e1a5;
+    padding:8px 10px;
+    border-radius:999px;
+    color:#33691e;
+    width:85%;
+    font-size:12px;
+  }
+
+  .modes{
+    display:flex;
+    gap:8px;
+    margin-top:12px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+
+  .mode{
+    padding:8px 10px;
+    border-radius:999px;
+    cursor:pointer;
+    border:1px solid #c8e6c9;
+    font-size:13px;
+    color:#33691e;
+    background:rgba(255,255,255,0.9);
+    transition:all 0.15s ease-out;
+  }
+
+  .mode:hover{
+    background:#e8f5e9;
+  }
+
+  .mode.active{
+    background:#43a047;
+    color:#ffffff;
+    border-color:#388e3c;
+  }
+
+  .right{
+    padding:18px;
+    border-radius:14px;
+    background:linear-gradient(145deg, rgba(245,249,246,0.97), rgba(232,245,233,0.97));
+    border:1px solid rgba(200,230,201,0.9);
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+
+  .topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+
+  .status{
+    font-size:13px;
+    color:var(--muted);
+  }
+
+  .subtitle-small{
+    font-size:13px;
+    color:var(--muted);
+  }
+
+  .visualizer-wrap{
+    height:260px;
+    border-radius:12px;
+    background:linear-gradient(135deg, rgba(219,238,221,0.9), rgba(232,245,233,0.9));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    overflow:hidden;
+    border:1px solid #c5e1a5;
+  }
+
+  canvas#circleViz{
+    width:100%;
+    height:100%;
+  }
+
+  .bar-viz{
+    height:90px;
+    border-radius:10px;
+    background:linear-gradient(135deg, rgba(232,245,233,0.95), rgba(219,238,221,0.95));
+    padding:8px;
+    border:1px solid #c5e1a5;
+  }
+
+  .subtitle-logs{
+    font-size:13px;
+    color:var(--muted);
+    margin-top:6px;
+  }
+
+  .log{
+    flex:1;
+    overflow:auto;
+    background:rgba(250,251,250,0.95);
+    border-radius:10px;
+    padding:10px;
+    border:1px solid rgba(224,242,231,0.9);
+    font-family:Consolas,monospace;
+    color:var(--neon);
+    font-size:13px;
+  }
+
+  .log .entry{
+    margin-bottom:8px;
+  }
+
+  .subtitle-bubble{
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    bottom:16px;
+    padding:10px 18px;
+    background:linear-gradient(135deg, rgba(46,125,50,0.98), rgba(27,94,32,0.98));
+    border-radius:20px;
+    border:1px solid rgba(200,230,201,0.9);
+    color:#e8f5e9;
+    font-weight:600;
+    backdrop-filter:blur(8px);
+    box-shadow:0 8px 20px rgba(27,94,32,0.55);
+  }
+
+  .footer-controls{
+    display:flex;
+    gap:10px;
+    align-items:center;
+  }
+
+  .switch{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:13px;
+    color:#33691e;
+  }
+
+  .switch input{
+    accent-color:#2e7d32;
+  }
+
+  @media (max-width:1000px){
+    .app{
+      grid-template-columns:1fr;
+      max-height:94vh;
+      height:94vh;
+    }
+    .holo-wrap{
+      width:200px;
+      height:200px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="left">
+    <div class="brand">J A R V I S</div>
+    <div class="subtitle">Cinematic AI Assistant — Live Mode</div>
+
+    <div class="holo-wrap">
+      <canvas id="holo" width="260" height="260"></canvas>
+      <div class="holo-reflection"></div>
+    </div>
+
+    <div class="controls">
+      <button id="bootBtn" class="big-btn">Boot JARVIS</button>
+      <button id="activateBtn" class="big-btn">Activate Jarvis</button>
+      <button id="micBtn" class="big-btn mic-btn">🎤 Start Voice</button>
+      <button id="speakTest" class="tiny">Test Speak (TTS)</button>
+    </div>
+
+    <div class="modes" style="margin-top:10px;">
+      <div class="mode" id="modeNeon">Neon</div>
+      <div class="mode" id="modeRed">Red</div>
+      <div class="mode" id="modeSilent">Silent</div>
+      <!-- Clear Log moved here, same level as Neon/Red/Silent -->
+      <div class="mode" id="clearLog">Clear Log</div>
+    </div>
+  </div>
+
+  <div class="right">
+    <div class="topbar">
+      <div>
+        <div style="font-weight:700">Live Visualizer</div>
+        <div class="subtitle-small">Mic input reacts to waveform & halo</div>
+      </div>
+      <div class="status" id="systemStatus">Status: Idle</div>
+    </div>
+
+    <div class="visualizer-wrap" id="visualizerWrap">
+      <canvas id="circleViz" width="720" height="260"></canvas>
+      <div class="subtitle-bubble" id="subtitleBubble">[System Ready]</div>
+    </div>
+
+    <div class="bar-viz" id="barVizArea">
+      <canvas id="barViz" width="980" height="90"></canvas>
+    </div>
+
+    <div class="subtitle-logs">System Log</div>
+    <div class="log" id="log">
+      <div class="entry">[Boot] System idle.</div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-start;align-items:center;margin-top:8px">
+      <div class="footer-controls">
+        <label class="switch"><input id="soundToggle" type="checkbox" checked> Sound</label>
+        <label class="switch"><input id="backendToggle" type="checkbox"> Backend</label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ------------------------------
+   CONFIG
+   ------------------------------ */
+// Automatically use current hostname, keep port 5001
+const BACKEND_WS_URL = "ws://" + window.location.hostname + ":5001";
+let socket = null;
+
+/* ------------------------------
+   ELEMENTS
+   ------------------------------ */
+const bootBtn        = document.getElementById('bootBtn');
+const activateBtn    = document.getElementById('activateBtn');
+const micBtn         = document.getElementById('micBtn');
+const speakTest      = document.getElementById('speakTest');
+const systemStatus   = document.getElementById('systemStatus');
+const logEl          = document.getElementById('log');
+const subtitleBubble = document.getElementById('subtitleBubble');
+const circleCanvas   = document.getElementById('circleViz');
+const circleCtx      = circleCanvas.getContext('2d');
+const barCanvas      = document.getElementById('barViz');
+const barCtx         = barCanvas.getContext('2d');
+const holoCanvas     = document.getElementById('holo');
+const holoCtx        = holoCanvas.getContext('2d');
+const soundToggle    = document.getElementById('soundToggle');
+const backendToggle  = document.getElementById('backendToggle');
+const clearLogBtn    = document.getElementById('clearLog');
+
+let audioContext = null;
+let analyser     = null;
+let dataArray    = null;
+let sourceNode   = null;
+let micStream    = null;
+let listening    = false;
+let recognition  = null;
+let soundEnabled = true;
+
+// Current language guess: 'en' or 'hi'
+let currentLanguage = 'en';
+
+/* ------------------------------
+   LOGGING / STATUS / UTILS
+   ------------------------------ */
+function log(msg){
+  const time = new Date().toLocaleTimeString();
+  const el = document.createElement('div');
+  el.className = "entry";
+  el.textContent = `[${time}] ${msg}`;
+  logEl.prepend(el);
+}
+
+function setSubtitle(text){
+  subtitleBubble.textContent = text;
+}
+
+function setStatus(text){
+  systemStatus.textContent = "Status: " + text;
+  log(text);
+}
+
+function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+/* ------------------------------
+   LANGUAGE DETECTION (EN / HI)
+   ------------------------------ */
+function detectLanguage(text){
+  if(!text) return 'en';
+  // Devanagari characters -> Hindi
+  if(/[\u0900-\u097F]/.test(text)){
+    return 'hi';
+  }
+  const lower = text.toLowerCase();
+  const hindiKeywords = [
+    "namaste","namaskar","shukriya","dhanyavaad","dhanyavad",
+    "kya","kaise","nahi","haan","mera","aap","tum","kyun","kyon",
+    "bahut","krta","karta","raha","rha","kr","hai","hu"
+  ];
+  for(const kw of hindiKeywords){
+    if(lower.includes(kw)) return 'hi';
+  }
+  return 'en';
+}
+
+/* ------------------------------
+   BOOT ANIMATION
+   ------------------------------ */
+bootBtn.addEventListener('click', async () => {
+  await bootSequence();
+  connectBackend();
+  backendToggle.checked = true;
+});
+
+async function bootSequence(){
+  setStatus("Booting...");
+  setSubtitle("BOOTING JARVIS PROTOCOL...");
+  await sleep(700);
+  setSubtitle("INITIALIZING AUDIO STACK...");
+  await sleep(600);
+  setSubtitle("LOADING AI MODULES...");
+  await sleep(900);
+  setSubtitle("SYSTEM ONLINE");
+  setStatus("Online");
+  setSubtitle("[Awaiting Command]");
+}
+
+/* ------------------------------
+   TTS (browser)
+   ------------------------------ */
+function speakText(text, lang){
+  if(!soundEnabled) return;
+  if(!text) return;
+  if('speechSynthesis' in window){
+    const utteranceLang = lang || detectLanguage(text);
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    if(utteranceLang === 'hi'){
+      u.lang = 'hi-IN';
+    } else {
+      // English default
+      u.lang = 'en-IN'; // you can change to 'en-US' if you prefer
+    }
+    u.rate = 1;
+    u.pitch = 1;
+    speechSynthesis.speak(u);
+  } else {
+    console.warn("TTS not available");
+  }
+}
+
+speakTest.addEventListener('click', ()=>{ speakText("Jarvis test voice activated.", "en"); });
+
+soundToggle.addEventListener('change', (e)=>{
+  soundEnabled = e.target.checked;
+  if (!soundEnabled && 'speechSynthesis' in window) {
+    speechSynthesis.cancel();
+  }
+});
+
+/* ------------------------------
+   THEME / MODE SWITCH
+   ------------------------------ */
+document.getElementById('modeNeon').addEventListener('click', ()=>{ setTheme('neon'); });
+document.getElementById('modeRed').addEventListener('click',  ()=>{ setTheme('red');  });
+document.getElementById('modeSilent').addEventListener('click', ()=>{ setTheme('silent'); });
+
+function setTheme(name){
+  if(name==='neon'){
+    document.documentElement.style.setProperty('--neon','#00eaff');
+    document.documentElement.style.setProperty('--accent','#ff2e63');
+    soundEnabled = true;
+  } else if(name==='red'){
+    document.documentElement.style.setProperty('--neon','#ff6b6b');
+    document.documentElement.style.setProperty('--accent','#ff2e63');
+    soundEnabled = true;
+  } else {
+    document.documentElement.style.setProperty('--neon','#7fb6c6');
+    document.documentElement.style.setProperty('--accent','#7f3b3b');
+    soundEnabled = false;
+    if('speechSynthesis' in window){
+      speechSynthesis.cancel();
+    }
+  }
+  soundToggle.checked = soundEnabled;
+  log("Theme set: " + name);
+}
+
+/* ------------------------------
+   HOLOGRAM ANIMATION
+   ------------------------------ */
+let holoPhase = 0;
+function drawHolo(){
+  const cw = holoCanvas.width;
+  const ch = holoCanvas.height;
+  holoCtx.clearRect(0,0,cw,ch);
+  const cx = cw/2, cy = ch/2;
+  for(let i=0;i<8;i++){
+    const r = 30 + i*13 + Math.sin(holoPhase/30 + i)*6;
+    holoCtx.beginPath();
+    holoCtx.strokeStyle = `rgba(0,230,255,${0.06 + i*0.03})`;
+    holoCtx.lineWidth = 2;
+    holoCtx.arc(cx, cy, r, 0, Math.PI*2);
+    holoCtx.stroke();
+  }
+  const gradient = holoCtx.createRadialGradient(cx,cy,10,cx,cy,120);
+  gradient.addColorStop(0, 'rgba(0,230,255,0.45)');
+  gradient.addColorStop(1, 'rgba(0,0,0,0)');
+  holoCtx.fillStyle = gradient;
+  holoCtx.fillRect(cx-120, cy-120, 240,240);
+  holoPhase += 1;
+  requestAnimationFrame(drawHolo);
+}
+drawHolo();
+
+/* ------------------------------
+   AUDIO VISUALIZER
+   ------------------------------ */
+function ensureAudio(){
+  if(!audioContext){
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  }
+}
+function startVisualizer(stream){
+  ensureAudio();
+  if(analyser) analyser.disconnect();
+  analyser = audioContext.createAnalyser();
+  analyser.fftSize = 256;
+  const bufferLen = analyser.frequencyBinCount;
+  dataArray = new Uint8Array(bufferLen);
+  sourceNode = audioContext.createMediaStreamSource(stream);
+  sourceNode.connect(analyser);
+  renderLoop();
+  renderBars();
+}
+function stopVisualizer(){
+  if(sourceNode){ try{ sourceNode.disconnect(); }catch(e){} sourceNode=null; }
+  if(analyser){ try{ analyser.disconnect(); }catch(e){} analyser=null; }
+}
+
+function renderLoop(){
+  if(!analyser) return;
+  analyser.getByteFrequencyData(dataArray);
+  const w = circleCanvas.width = circleCanvas.clientWidth;
+  const h = circleCanvas.height = circleCanvas.clientHeight;
+  circleCtx.clearRect(0,0,w,h);
+  const cx = w/2, cy = h/2;
+  const bars = 64;
+  const step = Math.floor(dataArray.length / bars);
+  const radiusBase = Math.min(w,h)/7;
+  for(let i=0;i<bars;i++){
+    let sum = 0;
+    for(let j=0;j<step;j++) sum += dataArray[i*step + j] || 0;
+    const avg = sum/step;
+    const angle = (i / bars) * Math.PI*2;
+    const amp = (avg/255) * 60;
+    const r1 = radiusBase + amp;
+    const x1 = cx + Math.cos(angle) * (r1);
+    const y1 = cy + Math.sin(angle) * (r1);
+    const x0 = cx + Math.cos(angle) * (radiusBase);
+    const y0 = cy + Math.sin(angle) * (radiusBase);
+    circleCtx.beginPath();
+    circleCtx.moveTo(x0,y0);
+    circleCtx.lineTo(x1,y1);
+    const intensity = Math.min(1, avg/200);
+    const color = `rgba(${Math.floor(0+intensity*255)},${Math.floor(230-intensity*40)},${Math.floor(255-intensity*200)},0.95)`;
+    circleCtx.strokeStyle = color;
+    circleCtx.lineWidth = 2 + intensity*2;
+    circleCtx.stroke();
+  }
+  requestAnimationFrame(renderLoop);
+}
+
+function renderBars(){
+  if(!analyser) return;
+  analyser.getByteFrequencyData(dataArray);
+  const w = barCanvas.width = barCanvas.clientWidth;
+  const h = barCanvas.height = barCanvas.clientHeight;
+  barCtx.clearRect(0,0,w,h);
+  const bars = 60;
+  const step = Math.floor(dataArray.length / bars);
+  const bw = w / bars * 0.7;
+  let x = 0;
+  for(let i=0;i<bars;i++){
+    let sum = 0;
+    for(let j=0;j<step;j++) sum += dataArray[i*step + j] || 0;
+    const avg = sum/step;
+    const scaled = (avg / 255) * h;
+    const intensity = Math.min(1, avg/200);
+    barCtx.fillStyle = `rgba(${Math.floor(0+intensity*255)},${Math.floor(230-intensity*40)},${Math.floor(255-intensity*200)},0.95)`;
+    barCtx.fillRect(x, h - scaled, bw, scaled);
+    barCtx.fillStyle = `rgba(0,230,255,${0.06 + intensity*0.2})`;
+    barCtx.fillRect(x, h - scaled - 4, bw, 4);
+    x += bw + (w / bars) * 0.3;
+  }
+  requestAnimationFrame(renderBars);
+}
+
+/* ------------------------------
+   MIC / VOICE CONTROL
+   ------------------------------ */
+micBtn.addEventListener('click', async ()=>{
+  if(!listening) {
+    try {
+      micStream = await navigator.mediaDevices.getUserMedia({ audio:true });
+      startVisualizer(micStream);
+      enableSpeechRecognition();
+      listening = true;
+      micBtn.textContent = "🔴 Stop Voice";
+      setStatus("Listening");
+      setSubtitle("Listening...");
+      log("Microphone started.");
+    } catch(e){
+      console.error(e);
+      log("Mic error: " + e.message);
+      setStatus("Mic error");
+      setSubtitle("[Mic error]");
+    }
+  } else {
+    stopListening();
+  }
+});
+
+function stopListening(){
+  listening = false;
+  micBtn.textContent = "🎤 Start Voice";
+  setStatus("Idle");
+  setSubtitle("[System Ready]");
+  if(micStream){
+    micStream.getTracks().forEach(t=>t.stop());
+    micStream=null;
+  }
+  if(recognition){
+    try{ recognition.stop(); }catch(e){}
+    recognition=null;
+  }
+  stopVisualizer();
+  log("Microphone stopped.");
+  if('speechSynthesis' in window){
+    speechSynthesis.cancel();
+  }
+}
+
+/* speech recognition (Web Speech API) */
+function enableSpeechRecognition(){
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRecognition){
+    log("SpeechRecognition not supported in this browser.");
+    setSubtitle("[Voice unsupported]");
+    return;
+  }
+  recognition = new SpeechRecognition();
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.lang = currentLanguage === 'hi' ? 'hi-IN' : 'en-US';
+
+  recognition.onstart = ()=>{ setSubtitle("Listening..."); };
+  recognition.onerror = (e)=>{ log("Recognition error: " + e.error); setSubtitle("[Recognition error]"); };
+  recognition.onend = ()=>{
+    if(listening){
+      recognition.start();
+    } else {
+      setSubtitle("[System Ready]");
+    }
+  };
+
+  recognition.onresult = (ev)=>{
+    let interim = "";
+    let final = "";
+    for(let i=ev.resultIndex;i<ev.results.length;i++){
+      const r = ev.results[i];
+      if(r.isFinal) final += r[0].transcript;
+      else interim += r[0].transcript;
+    }
+    if(interim) setSubtitle(interim + " …");
+    if(final){
+      setSubtitle(final);
+      setStatus("Processing");
+      currentLanguage = detectLanguage(final);
+      if(recognition){
+        recognition.lang = currentLanguage === 'hi' ? 'hi-IN' : 'en-US';
+      }
+      handleUserCommand(final, currentLanguage);
+    }
+  };
+  recognition.start();
+}
+
+/* ------------------------------
+   HANDLE COMMAND -> Backend
+   ------------------------------ */
+function sendCommand(text){
+  if(socket && socket.readyState === WebSocket.OPEN){
+    socket.send(JSON.stringify({ command: text }));
+    log("You: " + text);
+    return true;
+  } else {
+    log("Backend not connected.");
+    setSubtitle("Backend not connected");
+    return false;
+  }
+}
+
+async function handleUserCommand(text, langHint){
+  log("User: " + text);
+  setSubtitle("Processing: " + text);
+
+  const lower = text.toLowerCase();
+
+  // If user says stop / quit / terminate / cancel / be quiet -> stop browser TTS immediately
+  if (
+    lower.includes("stop") ||
+    lower.includes("be quiet") ||
+    lower.includes("shut up") ||
+    lower.includes("cancel") ||
+    lower.includes("terminate") ||
+    lower.includes("quit")
+  ) {
+    if('speechSynthesis' in window){
+      speechSynthesis.cancel();
+    }
+  }
+
+  const ok = sendCommand(text);
+  if(!ok){
+    const reply = "I heard: " + text + ". (backend offline demo response)";
+    setSubtitle(reply);
+    const lang = langHint || detectLanguage(reply);
+    speakText(reply, lang);
+    log("Jarvis: " + reply);
+  }
+}
+
+/* ------------------------------
+   BACKEND WEBSOCKET
+   ------------------------------ */
+function connectBackend(){
+  if(socket && socket.readyState === WebSocket.OPEN){
+    log("Backend already connected.");
+    setStatus("Online");
+    return;
+  }
+
+  log("Connecting to backend...");
+  socket = new WebSocket(BACKEND_WS_URL);
+
+  socket.onopen = () => {
+    log("Backend Connected ✔");
+    setStatus("Online");
+    setSubtitle("Backend Online");
+  };
+
+  socket.onmessage = (event) => {
+    try{
+      const data  = JSON.parse(event.data);
+      const reply = data.reply || data.response || event.data;
+      const lang  = data.lang || detectLanguage(reply);
+      log("Jarvis: " + reply);
+      setSubtitle(reply);
+
+      const lowerReply = String(reply).toLowerCase();
+
+      // Do NOT speak the "Speech stopped." message
+      if (!lowerReply.includes("speech stopped")) {
+        speakText(reply, lang);
+      }
+    }catch(e){
+      log("WS message parse error: " + e.message);
+    }
+  };
+
+  socket.onerror = () => {
+    log("Cannot reach backend ❌");
+    setStatus("Error");
+  };
+
+  socket.onclose = () => {
+    log("Backend disconnected ❌");
+    setStatus("Disconnected");
+  };
+}
+
+/* Activate Jarvis button */
+activateBtn.addEventListener('click', () => {
+  connectBackend();
+  log("Activate Jarvis pressed.");
+});
+
+/* Backend toggle */
+backendToggle.addEventListener('change', (e)=>{
+  if(e.target.checked){
+    connectBackend();
+  } else {
+    if(socket){
+      socket.close();
+      socket = null;
+      log("Backend connection closed by user.");
+      setStatus("Idle");
+      setSubtitle("[System Ready]");
+    }
+  }
+});
+
+/* Clear log */
+clearLogBtn.addEventListener('click', ()=>{
+  logEl.innerHTML = '';
+});
+
+/* ------------------------------
+   CANVAS FIT + INIT
+   ------------------------------ */
+function fitCanvases(){
+  [circleCanvas, barCanvas, holoCanvas].forEach(c=>{
+    const rect = c.getBoundingClientRect();
+    c.width = rect.width;
+    c.height = rect.height;
+  });
+}
+window.addEventListener('resize', fitCanvases);
+fitCanvases();
+
+setStatus("Idle");
+setSubtitle("[System Ready]");
+log("UI ready.");
+</script>
+</body>
+</html>
